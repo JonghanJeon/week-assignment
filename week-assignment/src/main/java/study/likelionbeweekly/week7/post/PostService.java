@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import study.likelionbeweekly.week7.member.Member;
 import study.likelionbeweekly.week7.member.MemberRepository;
+import study.likelionbeweekly.week7.post.PostCustomException.PostNotFoundException;
 import study.likelionbeweekly.week7.post.dto.CreatePostRequest;
 import study.likelionbeweekly.week7.post.dto.FindAllPostsResponse;
 import study.likelionbeweekly.week7.post.dto.FindPostResponse;
@@ -23,7 +24,7 @@ public class PostService {
     @Transactional
     public void createPost(CreatePostRequest request) {
         Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new EntityNotFoundException("존재하지않는 게시글"));
 
         String createTitle = request.title();
         String createContent = request.content();
@@ -38,14 +39,14 @@ public class PostService {
 
     public FindPostResponse findById(Long id) {
         Post post = postRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(PostNotFoundException::new);
         return FindPostResponse.of(post);
     }
 
     @Transactional
     public void updatePost(Long id, UpdatePostRequest request) {
         Post post = postRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(PostNotFoundException::new);
 
         String updateTitle = request.title();
         post.setTitle(updateTitle);
@@ -58,7 +59,7 @@ public class PostService {
     @Transactional
     public void deletePost(Long id) {
         Post post = postRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(PostNotFoundException::new);
         post.setDeleted(true);
     }
 }

@@ -1,17 +1,19 @@
 package study.likelionbeweekly.week7.comment;
 
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import study.likelionbeweekly.week7.comment.CommentCustomException.CommentNotFoundException;
 import study.likelionbeweekly.week7.comment.dto.CreateCommentRequest;
 import study.likelionbeweekly.week7.comment.dto.FindAllCommentsRequest;
 import study.likelionbeweekly.week7.comment.dto.FindAllCommentsResponse;
 import study.likelionbeweekly.week7.comment.dto.UpdateCommentRequest;
 import study.likelionbeweekly.week7.member.Member;
+import study.likelionbeweekly.week7.member.MemberCustomException.MemberNotFoundException;
 import study.likelionbeweekly.week7.member.MemberRepository;
 import study.likelionbeweekly.week7.post.Post;
+import study.likelionbeweekly.week7.post.PostCustomException.PostNotFoundException;
 import study.likelionbeweekly.week7.post.PostRepository;
 
 @Service
@@ -42,19 +44,19 @@ public class CommentService {
     private Member getMember(CreateCommentRequest request) {
         Long memberId = request.memberId();
         return memberRepository.findById(memberId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(MemberNotFoundException::new);
     }
 
     private Post getPost(CreateCommentRequest request) {
         Long postId = request.postId();
         return postRepository.findById(postId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(PostNotFoundException::new);
     }
 
     @Transactional
     public void updateComment(Long id, UpdateCommentRequest request) {
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(CommentNotFoundException::new);
 
         String updateContent = request.content();
         comment.setContent(updateContent);
@@ -63,7 +65,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long id) {
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(CommentNotFoundException::new);
         comment.setDeleted(true);
     }
 }

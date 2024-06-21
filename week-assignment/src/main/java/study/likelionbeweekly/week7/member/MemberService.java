@@ -1,11 +1,13 @@
 package study.likelionbeweekly.week7.member;
 
-import jakarta.persistence.EntityNotFoundException;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import study.likelionbeweekly.week7.member.MemberCustomException.DuplicatedEmailException;
+import study.likelionbeweekly.week7.member.MemberCustomException.MemberNotFoundException;
+import study.likelionbeweekly.week7.member.MemberCustomException.IncorrectPasswordException;
 import study.likelionbeweekly.week7.member.dto.JoinMemberRequest;
 import study.likelionbeweekly.week7.member.dto.LoginMemberRequest;
 import study.likelionbeweekly.week7.member.dto.UpdateMemberRequest;
@@ -21,8 +23,13 @@ public class MemberService {
         String loginEmail = request.email();
         String loginPassword = request.password();
 
+        System.out.println("loginEmail = " + loginEmail);
+        System.out.println("loginPassword = " + loginPassword);
+
         Member member = memberRepository.findByEmail(loginEmail)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(MemberNotFoundException::new);
+
+        System.out.println("#################################################");
 
         checkLoginEmailAndPassword(loginEmail, loginPassword, member);
         return member;
@@ -32,7 +39,7 @@ public class MemberService {
         String email = member.getEmail();
         String password = member.getPassword();
         if (!Objects.equals(email, loginEmail) || !Objects.equals(password, loginEmail)) {
-            throw new IllegalArgumentException("비밀번호 불일치");
+            throw new IncorrectPasswordException();
         }
     }
 
@@ -52,7 +59,7 @@ public class MemberService {
     @Transactional
     public void updateMember(Long id, UpdateMemberRequest request) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(MemberNotFoundException::new);
 
         String updateName = request.name();
         String updateEmail = request.email();
@@ -68,14 +75,14 @@ public class MemberService {
 
     private void checkDuplicateEmail(Optional<Member> optionalMember) {
         if (optionalMember.isPresent()) {
-            throw new IllegalArgumentException("중복 이메일");
+            throw new DuplicatedEmailException();
         }
     }
 
     @Transactional
     public void deleteMember(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(MemberNotFoundException::new);
         member.setDeleted(true);
     }
 }
